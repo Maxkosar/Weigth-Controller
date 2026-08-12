@@ -88,7 +88,8 @@
   .stat .v{font-family:'JetBrains Mono',monospace; font-size:19px; font-weight:600;}
   .stat .l{font-size:10.5px; color:var(--text-muted); margin-top:3px; text-transform:uppercase; letter-spacing:0.4px;}
 
-  canvas{width:100% !important;}
+  .chart-wrap{position:relative; width:100%; height:240px;}
+  .chart-wrap canvas{width:100% !important; height:100% !important;}
 
   /* Forms */
   label{display:block; font-size:12px; color:var(--text-muted); margin:14px 0 6px; font-weight:500;}
@@ -172,7 +173,7 @@
       <div id="panelContent" style="display:none">
         <div class="card">
           <h2>Progreso vs. plan</h2>
-          <canvas id="chart" height="220"></canvas>
+          <div class="chart-wrap"><canvas id="chart"></canvas></div>
         </div>
 
         <div class="card">
