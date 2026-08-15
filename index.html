@@ -3,11 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="Seguimiento físico personal: peso, calorías, entrenamientos y medidas corporales.">
 <meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="FitControl">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
+<link rel="icon" href="icons/icon-512.png" sizes="512x512" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>FitControl Pro</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous"></script>
 <style>
 :root{
  --bg:#0b1120;--card:#151f32;--card2:#1c2940;--input:#26344d;--text:#f8fafc;
@@ -228,12 +235,22 @@ details summary{cursor:pointer;color:var(--blue);font-weight:700}
 
 <script>
 const KEY="fitcontrol_pro_v1";
-let state=JSON.parse(localStorage.getItem(KEY))||{
+const DEFAULT_STATE={
  config:{startWeight:93,targetWeight:79,height:185,calories:2200,water:8,weeklyLoss:.75,startDate:new Date().toISOString().slice(0,10)},
  weights:[],measures:[],foods:[],trainings:[],water:{}
 };
+function loadState(){
+ try{
+  let raw=localStorage.getItem(KEY);
+  if(!raw)return structuredClone(DEFAULT_STATE);
+  let d=JSON.parse(raw);
+  if(!d||typeof d!=="object"||!d.config)return structuredClone(DEFAULT_STATE);
+  return {...structuredClone(DEFAULT_STATE),...d,config:{...DEFAULT_STATE.config,...d.config}};
+ }catch(e){console.error("No se pudo leer el almacenamiento local, se usan valores por defecto.",e);return structuredClone(DEFAULT_STATE)}
+}
+let state=loadState();
 
-function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){console.error("No se pudo guardar (almacenamiento lleno o no disponible).",e);alert("No se pudieron guardar los datos: el almacenamiento del navegador está lleno o no disponible.")}}
 function today(){return new Date().toISOString().slice(0,10)}
 function fmtDate(d){return new Date(d).toLocaleDateString("es-AR",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}
 function showPage(id,btn){
@@ -272,7 +289,7 @@ function updateDashboard(){
  startWeightTxt.textContent=c.startWeight.toFixed(1)+" kg";targetWeightTxt.textContent=c.targetWeight.toFixed(1)+" kg";
  lostEl.textContent=(lost>=0?"-":"+")+Math.abs(lost).toFixed(1)+" kg";progressTxt.textContent=prog.toFixed(0)+"%";
  goalProgress.style.width=prog+"%";
- let bmi=w/((c.height/100)**2);document.getElementById("bmi").textContent=bmi.toFixed(1);
+ let bmi=c.height>0?w/((c.height/100)**2):0;document.getElementById("bmi").textContent=bmi>0?bmi.toFixed(1):"--";
  avg7El.textContent=avg7().toFixed(1)+" kg";
  let delta=w-expectedWeight(new Date());
  deltaEl.textContent=(delta>0?"+":"")+delta.toFixed(1)+" kg";
@@ -296,20 +313,32 @@ function updateDashboard(){
 }
 const currentWeightEl=document.getElementById("currentWeight"),lostEl=document.getElementById("lost"),progressTxt=document.getElementById("progressTxt"),avg7El=document.getElementById("avg7");
 
+// Nota: se usa una escala "linear" con los días desde epoch como valor X en vez de
+// la escala "time" de Chart.js, porque esta última requiere un adaptador de fechas
+// externo (chartjs-adapter-date-fns/luxon) que no estaba incluido: sin él, Chart.js
+// lanza un error al dibujar y el gráfico de progreso queda roto. Esta versión no
+// depende de librerías extra, lo cual además la hace más liviana y confiable offline.
+function toDayNum(d){return new Date(d).getTime()/86400000}
+function fmtDay(dayNum){return new Date(dayNum*86400000).toLocaleDateString("es-AR",{day:"2-digit",month:"short"})}
+
 let chart=new Chart(document.getElementById("weightChart"),{type:"line",data:{datasets:[
  {label:"Teórico",borderColor:"#38bdf8",borderDash:[6,5],pointRadius:0,data:[],tension:.2},
  {label:"Real",borderColor:"#4ade80",backgroundColor:"#4ade8018",pointRadius:4,data:[],tension:.25},
  {label:"Promedio 7D",borderColor:"#c084fc",pointRadius:0,data:[],tension:.3}
-]},options:{responsive:true,maintainAspectRatio:false,parsing:false,scales:{x:{type:"time",time:{unit:"day",displayFormats:{day:"dd MMM"}},ticks:{color:"#94a3b8"},grid:{color:"#26344d"}},y:{ticks:{color:"#94a3b8"},grid:{color:"#26344d"}}},plugins:{legend:{labels:{color:"#f8fafc"}}}}});
+]},options:{responsive:true,maintainAspectRatio:false,parsing:false,scales:{x:{type:"linear",ticks:{color:"#94a3b8",callback:fmtDay},grid:{color:"#26344d"}},y:{ticks:{color:"#94a3b8"},grid:{color:"#26344d"}}},plugins:{legend:{labels:{color:"#f8fafc"}},tooltip:{callbacks:{title:items=>items.length?fmtDay(items[0].parsed.x):""}}}}});
 
 function updateChart(){
  let range=document.getElementById("chartRange").value, now=Date.now(), start=range==="all"?0:now-Number(range)*86400000;
  let ws=[...state.weights].sort((a,b)=>new Date(a.date)-new Date(b.date)).filter(x=>new Date(x.date).getTime()>=start);
- chart.data.datasets[1].data=ws.map(x=>({x:x.date,y:x.weight}));
- chart.data.datasets[2].data=ws.map((x,i)=>({x:x.date,y:avgAt(i,ws)}));
- let end=ws.length?new Date(ws.at(-1).date):new Date();
- let st=new Date(Math.max(new Date(state.config.startDate).getTime(),start));
- chart.data.datasets[0].data=[{x:st,y:expectedWeight(st)},{x:end,y:expectedWeight(end)}];
+ chart.data.datasets[1].data=ws.map(x=>({x:toDayNum(x.date),y:x.weight}));
+ chart.data.datasets[2].data=ws.map((x,i)=>({x:toDayNum(x.date),y:avgAt(i,ws)}));
+ if(ws.length){
+  let end=new Date(ws.at(-1).date);
+  let st=new Date(Math.max(new Date(state.config.startDate).getTime(),start));
+  chart.data.datasets[0].data=[{x:toDayNum(st),y:expectedWeight(st)},{x:toDayNum(end),y:expectedWeight(end)}];
+ } else {
+  chart.data.datasets[0].data=[];
+ }
  chart.update();
 }
 function avgAt(i,arr){
@@ -349,10 +378,27 @@ function exportData(){
 }
 function importData(e){
  let file=e.target.files[0];if(!file)return;
- let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!d.config||!Array.isArray(d.weights))throw 0;state=d;save();initConfig();updateAll();alert("Datos importados correctamente.")}catch{alert("El archivo no es un respaldo válido de FitControl.")}};r.readAsText(file)
+ let r=new FileReader();r.onload=()=>{
+  try{
+   let d=JSON.parse(r.result);
+   let ok=d&&typeof d==="object"&&d.config&&["weights","measures","foods","trainings"].every(k=>Array.isArray(d[k]))&&d.water&&typeof d.water==="object";
+   if(!ok)throw 0;
+   state={...structuredClone(DEFAULT_STATE),...d,config:{...DEFAULT_STATE.config,...d.config}};
+   save();initConfig();updateAll();alert("Datos importados correctamente.")
+  }catch{alert("El archivo no es un respaldo válido de FitControl.")}
+ };
+ r.onerror=()=>alert("No se pudo leer el archivo seleccionado.");
+ r.readAsText(file);
+ e.target.value="";
 }
 function clearAll(){if(confirm("¿Seguro que querés borrar TODOS los datos? Esta acción no se puede deshacer.")){localStorage.removeItem(KEY);location.reload()}}
 setNow();initConfig();updateAll();
+
+if("serviceWorker" in navigator){
+ window.addEventListener("load",()=>{
+  navigator.serviceWorker.register("service-worker.js").catch(err=>console.error("Error registrando el service worker:",err));
+ });
+}
 </script>
 </body>
 </html>
