@@ -1,15 +1,31 @@
 # FitControl Pro
 
-App de seguimiento físico (peso, calorías, entrenamientos y medidas) — instalable como PWA. 100% local: todos los datos se guardan en el navegador (`localStorage`), no hay backend.
+App de seguimiento de **peso corporal** — instalable como PWA. 100% local: todos los datos se guardan en el navegador (`localStorage`), no hay backend. Se sacaron las secciones de comidas, entrenamientos y medidas corporales para enfocar todo en el peso, con la mayor cantidad de métricas posibles sobre esa única variable.
+
+## Qué mide la app
+
+Además del registro simple de pesajes (con momento del día y nota opcional), el dashboard calcula:
+
+- Peso actual, perdidos, restante y % de progreso hacia la meta
+- IMC y su categoría (bajo peso / normal / sobrepeso / obesidad)
+- Promedio móvil de 7 y 30 días
+- Delta vs. la curva teórica configurada
+- **Ritmo actual real**: regresión lineal sobre los pesajes de los últimos 21 días (kg/semana), independiente del plan teórico
+- **Proyección de fecha de meta**: en base al ritmo actual, estima cuándo se alcanzaría el peso objetivo
+- Racha de días consecutivos con registro
+- Variación/volatilidad de los últimos 7 días (desvío estándar, útil para distinguir ruido por retención de líquidos de una tendencia real)
+- Mínimo y máximo histórico, total de registros
+- Gráfico con teórico, real, promedio 7D y promedio 30D, con selector de rango (7/30/90 días o todo)
 
 ## Qué se arregló y mejoró respecto al archivo original
 
 - **Bug principal (el gráfico no funcionaba):** el gráfico de progreso usaba una escala de tipo `"time"` de Chart.js, que requiere un adaptador de fechas externo (`chartjs-adapter-date-fns` o similar) que no estaba incluido. Sin ese adaptador, Chart.js tira un error al dibujar y el gráfico queda vacío/roto. Se reemplazó por una escala numérica propia (días desde epoch + formateo manual de etiquetas), así no depende de una librería extra y funciona mejor offline.
 - Chart.js pasó a cargarse desde una versión fija (`4.4.4`) en vez de `@latest`, para evitar que una actualización futura de la librería rompa la app sin aviso.
 - Lectura/escritura de `localStorage` envuelta en `try/catch`, con aviso al usuario si el almacenamiento está lleno o no disponible (por ejemplo, en modo privado de Safari).
-- Validación más estricta al importar un backup `.json` (antes solo chequeaba `config` y `weights`; ahora valida también `measures`, `foods`, `trainings` y `water`).
+- Validación más estricta al importar un backup `.json`.
 - Corregido el cálculo de IMC para no dividir por cero si la altura queda en 0.
 - Convertida en **PWA instalable**: `manifest.json`, ícono en 3 tamaños (incluido uno *maskable* para Android) y `service-worker.js` con caché de la app para que funcione offline después de la primera carga.
+- Eliminadas por completo las secciones de comidas, entrenamientos y medidas corporales, y todos sus datos/campos asociados en el estado guardado, para simplificar la app y concentrar el desarrollo en el seguimiento de peso.
 
 ## Estructura de archivos
 
@@ -51,7 +67,7 @@ Cada vez que cambies `index.html` (o cualquier archivo cacheado), subí el cambi
 
 ## Datos y backups
 
-Los datos viven solo en el navegador donde se usa la app (no se sincronizan entre dispositivos). Desde la pestaña **⚙️ Datos** podés:
+Los datos viven solo en el navegador donde se usa la app (no se sincronizan entre dispositivos). Desde la pestaña **⚖️ Registro** podés:
 - **Exportar**: descarga un `.json` con todo (pesos, comidas, entrenamientos, medidas, configuración).
 - **Importar**: restaura un backup exportado previamente.
 - **Borrar todos los datos**: resetea la app por completo (acción irreversible).

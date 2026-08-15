@@ -1,7 +1,7 @@
 // Service worker de FitControl Pro.
 // Sube CACHE_NAME cada vez que cambies index.html u otros assets para que
 // los usuarios reciban la versión nueva (el SW borra las cachés viejas al activarse).
-const CACHE_NAME = "fitcontrol-v1";
+const CACHE_NAME = "fitcontrol-v2";
 
 const CORE_ASSETS = [
   "./",

@@ -1,7 +1,7 @@
 {
   "name": "FitControl Pro",
   "short_name": "FitControl",
-  "description": "Seguimiento físico personal: peso, calorías, entrenamientos y medidas corporales.",
+  "description": "Seguimiento de peso corporal: progreso, promedios, ritmo real y proyección de meta.",
   "start_url": "./index.html",
   "scope": "./",
   "id": "./index.html",
