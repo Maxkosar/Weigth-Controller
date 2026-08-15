@@ -1,567 +1,358 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FitControl PWA</title>
-    <!-- Web App Manifest embedded via Data URI -->
-    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkZpdENvbnRyb2wgUFdBIiwKICAic2hvcnRfbmFtZSI6ICJGaXRDb250cm9sIiwKICAic3RhcnRfdXJsIjogIi4vIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGYxNzJhIiwKICAidGhlbWVfY29sb3IiOiAiIzBmMTcyYSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbDt1dGY4LDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgNTEyIDUxMic+PHJlY3Qgd2lkdGg9JzUxMicgaGVpZ2h0PSc1MTInIGZpbGw9JyMwZjE3MmEnLz48cGF0aCBkPSdNMjU2IDY0TDk2IDE2MHYxOTJsMTYwIDk2IDE2MC05NlYxNjBMMjU2IDY0eicgZmlsbD0nbm9uZScgc3Ryb2tlPScjMzhiZGY4JyBzdHJva2Utd2lkdGg9JzMyJy8+PC9zdmc+IiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIgogICAgfQogIF0KfQ==">
-    <meta name="theme-color" content="#0f172a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="FitControl">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-    <style>
-        :root {
-            --bg-main: #0f172a;
-            --bg-card: #1e293b;
-            --bg-input: #334155;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent-blue: #38bdf8;
-            --accent-green: #4ade80;
-            --accent-purple: #c084fc;
-            --accent-red: #f87171;
-            --border-color: #334155;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            padding: 16px;
-            max-width: 600px;
-            margin: 0 auto;
-            padding-bottom: 40px;
-        }
-
-        header {
-            text-align: center;
-            padding: 12px 0 20px 0;
-        }
-
-        header h1 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--accent-blue);
-            letter-spacing: -0.5px;
-        }
-
-        header p {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        .card {
-            background-color: var(--bg-card);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 16px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-        }
-
-        .card-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-        }
-
-        .form-group {
-            margin-bottom: 10px;
-        }
-
-        label {
-            display: block;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 10px 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            background-color: var(--bg-input);
-            color: var(--text-main);
-            font-size: 0.95rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        input:focus {
-            border-color: var(--accent-blue);
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            background-color: var(--accent-blue);
-            color: #0f172a;
-            font-size: 0.95rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            margin-top: 6px;
-        }
-
-        button:active {
-            opacity: 0.8;
-        }
-
-        button.btn-secondary {
-            background-color: var(--bg-input);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-        }
-
-        .stat-card {
-            background-color: rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
-            padding: 12px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .stat-val {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--accent-blue);
-            margin-top: 2px;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 280px;
-            width: 100%;
-        }
-
-        .logs-list {
-            max-height: 220px;
-            overflow-y: auto;
-        }
-
-        .log-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.88rem;
-        }
-
-        .log-item:last-child {
-            border-bottom: none;
-        }
-
-        .log-date {
-            color: var(--text-muted);
-            font-size: 0.8rem;
-        }
-
-        .log-weight {
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .btn-del {
-            background: none;
-            border: none;
-            color: var(--accent-red);
-            font-size: 1rem;
-            cursor: pointer;
-            width: auto;
-            padding: 0 8px;
-            margin: 0;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .badge-green { background: rgba(74, 222, 128, 0.15); color: var(--accent-green); }
-        .badge-red { background: rgba(248, 113, 113, 0.15); color: var(--accent-red); }
-
-        details summary {
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--accent-blue);
-            font-size: 0.9rem;
-            outline: none;
-            user-select: none;
-        }
-
-        details[open] summary {
-            margin-bottom: 12px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="FitControl">
+<title>FitControl Pro</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+ --bg:#0b1120;--card:#151f32;--card2:#1c2940;--input:#26344d;--text:#f8fafc;
+ --muted:#94a3b8;--blue:#38bdf8;--green:#4ade80;--purple:#c084fc;
+ --red:#f87171;--yellow:#facc15;--border:#2b3a55;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+body{background:var(--bg);color:var(--text);max-width:760px;margin:auto;padding:16px 16px 90px}
+header{text-align:center;padding:10px 0 20px}
+header h1{font-size:1.8rem;color:var(--blue)}
+header p{color:var(--muted);font-size:.85rem;margin-top:4px}
+nav{position:sticky;top:8px;z-index:10;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:rgba(11,17,32,.92);padding:6px;border-radius:14px;margin-bottom:14px;backdrop-filter:blur(10px)}
+nav button{margin:0;padding:9px 4px;font-size:.75rem;background:var(--card);color:var(--muted);border:1px solid var(--border)}
+nav button.active{background:var(--blue);color:#07111e}
+.page{display:none}.page.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 5px 18px #0003}
+.card-title{display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:13px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:#ffffff06;border:1px solid #ffffff0d;border-radius:12px;padding:11px;text-align:center}
+.stat small{display:block;color:var(--muted);font-size:.7rem}.stat strong{display:block;font-size:1.2rem;margin-top:3px;color:var(--blue)}
+label{display:block;color:var(--muted);font-size:.72rem;text-transform:uppercase;margin:9px 0 4px}
+input,select{width:100%;padding:11px;border-radius:9px;border:1px solid var(--border);background:var(--input);color:var(--text);outline:none}
+input:focus,select:focus{border-color:var(--blue)}
+button{width:100%;padding:11px;border:0;border-radius:9px;background:var(--blue);color:#07111e;font-weight:700;cursor:pointer;margin-top:8px}
+button.secondary{background:var(--input);color:var(--text);border:1px solid var(--border)}
+button.danger{background:#7f1d1d;color:#fecaca}
+button.small{width:auto;padding:7px 10px;font-size:.78rem;margin:0}
+.chart{height:290px;position:relative}
+.progress{height:10px;background:#ffffff10;border-radius:20px;overflow:hidden;margin:9px 0}
+.progress>div{height:100%;background:var(--blue);border-radius:20px;transition:.3s}
+.badge{display:inline-block;padding:4px 9px;border-radius:20px;font-size:.72rem;font-weight:700}
+.green{background:#4ade8020;color:var(--green)}.red{background:#f8717120;color:var(--red)}.yellow{background:#facc1520;color:var(--yellow)}
+.list{max-height:310px;overflow:auto}
+.item{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border);gap:10px}
+.item:last-child{border-bottom:0}
+.item-main{flex:1}.item-title{font-weight:700}.item-sub{font-size:.75rem;color:var(--muted);margin-top:2px}
+.kcal{font-weight:700;color:var(--green)}
+.icon{font-size:1.4rem}.empty{text-align:center;color:var(--muted);padding:20px}
+details summary{cursor:pointer;color:var(--blue);font-weight:700}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.notice{padding:11px;border-radius:10px;background:#38bdf810;border:1px solid #38bdf820;color:#bae6fd;font-size:.8rem}
+.hero{background:linear-gradient(145deg,#16263c,#101827);border-color:#38bdf830}
+.hero-weight{font-size:2.5rem;font-weight:800;margin:4px 0}.hero-weight span{font-size:1rem;color:var(--muted)}
+.section-title{font-size:.9rem;color:var(--muted);margin-bottom:9px;font-weight:700}
+@media(max-width:430px){.grid3{grid-template-columns:1fr 1fr}.grid3 .stat:last-child{grid-column:1/-1}}
+</style>
 </head>
 <body>
 
-    <header>
-        <h1>FitControl</h1>
-        <p>Seguimiento Teórico vs. Real</p>
-    </header>
+<header>
+<h1>FitControl</h1>
+<p>Seguimiento físico · Teórico vs. Real</p>
+</header>
 
-    <!-- METRICAS CLAVE -->
-    <div class="grid-3" style="margin-bottom: 16px;">
-        <div class="stat-card">
-            <label>Promedio (7d)</label>
-            <div class="stat-val" id="statAvg">-- kg</div>
-        </div>
-        <div class="stat-card">
-            <label>vs. Teórico</label>
-            <div class="stat-val" id="statDelta">--</div>
-        </div>
-        <div class="stat-card">
-            <label>Meta Final</label>
-            <div class="stat-val" id="statTarget" style="color: var(--accent-purple);">-- kg</div>
-        </div>
-    </div>
+<nav>
+<button class="active" onclick="showPage('dashboard',this)">🏠 Inicio</button>
+<button onclick="showPage('food',this)">🔥 Comidas</button>
+<button onclick="showPage('training',this)">🏋️ Entreno</button>
+<button onclick="showPage('data',this)">⚙️ Datos</button>
+</nav>
 
-    <!-- GRAFICO -->
-    <div class="card">
-        <div class="card-title">
-            <span>Progreso</span>
-            <span id="planStatus" class="badge badge-green">En Plan</span>
-        </div>
-        <div class="chart-container">
-            <canvas id="weightChart"></canvas>
-        </div>
-    </div>
+<!-- DASHBOARD -->
+<section id="dashboard" class="page active">
+<div class="card hero">
+<div class="section-title">PESO ACTUAL</div>
+<div class="hero-weight" id="currentWeight">-- <span>kg</span></div>
+<div id="statusBadge" class="badge green">Sin datos</div>
+<div class="progress"><div id="goalProgress"></div></div>
+<div style="display:flex;justify-content:space-between;color:var(--muted);font-size:.75rem">
+<span>Inicio: <b id="startWeightTxt">--</b></span><span>Meta: <b id="targetWeightTxt">--</b></span>
+</div>
+</div>
 
-    <!-- REGISTRAR PESO -->
-    <div class="card">
-        <div class="card-title">Nuevo Pesaje</div>
-        <form id="weightForm">
-            <div class="grid-2">
-                <div class="form-group">
-                    <label for="inputWeight">Peso (kg)</label>
-                    <input type="number" id="inputWeight" step="0.1" placeholder="Ej: 92.5" required>
-                </div>
-                <div class="form-group">
-                    <label for="inputDateTime">Fecha y Hora</label>
-                    <input type="datetime-local" id="inputDateTime" required>
-                </div>
-            </div>
-            <button type="submit">Guardar Pesaje</button>
-        </form>
-    </div>
+<div class="grid3">
+<div class="stat"><small>Perdidos</small><strong id="lost">--</strong></div>
+<div class="stat"><small>Progreso</small><strong id="progressTxt">--</strong></div>
+<div class="stat"><small>IMC</small><strong id="bmi">--</strong></div>
+<div class="stat"><small>Promedio 7d</small><strong id="avg7">--</strong></div>
+<div class="stat"><small>Vs. teórico</small><strong id="delta">--</strong></div>
+<div class="stat"><small>Entrenos</small><strong id="weekTraining">0</strong></div>
+</div>
 
-    <!-- CONFIGURAR PLAN TEORICO -->
-    <div class="card">
-        <details id="configDetails">
-            <summary>Configurar Plan / Meta Teórica</summary>
-            <form id="configForm" style="margin-top: 12px;">
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="cfgStartWeight">Peso Inicial (kg)</label>
-                        <input type="number" id="cfgStartWeight" step="0.1" value="93" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="cfgTargetWeight">Peso Meta (kg)</label>
-                        <input type="number" id="cfgTargetWeight" step="0.1" value="79" required>
-                    </div>
-                </div>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="cfgStartDate">Fecha de Inicio</label>
-                        <input type="date" id="cfgStartDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="cfgDeficit">Pérdida Semanal</label>
-                        <select id="cfgDeficit">
-                            <option value="0.5">0.5 kg / sem (500 kcal/d)</option>
-                            <option value="0.75" selected>0.75 kg / sem (750 kcal/d)</option>
-                            <option value="1.0">1.0 kg / sem (1000 kcal/d)</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit" class="btn-secondary">Actualizar Meta Teórica</button>
-            </form>
-        </details>
-    </div>
+<div class="card" style="margin-top:14px">
+<div class="card-title"><span>📈 Progreso</span>
+<select id="chartRange" onchange="updateChart()" style="width:auto;padding:6px">
+<option value="7">7 días</option><option value="30" selected>30 días</option><option value="90">3 meses</option><option value="all">Todo</option>
+</select></div>
+<div class="chart"><canvas id="weightChart"></canvas></div>
+</div>
 
-    <!-- HISTORIAL -->
-    <div class="card">
-        <div class="card-title">Historial de Pesajes</div>
-        <div class="logs-list" id="logsList">
-            <!-- Render dinámico -->
-        </div>
-    </div>
+<div class="card">
+<div class="card-title">🔥 Calorías de hoy <span id="calorieStatus" class="badge green">--</span></div>
+<div class="grid3">
+<div class="stat"><small>Objetivo</small><strong id="calGoal">--</strong></div>
+<div class="stat"><small>Consumidas</small><strong id="calEaten">--</strong></div>
+<div class="stat"><small>Restantes</small><strong id="calLeft">--</strong></div>
+</div>
+<div class="progress"><div id="calProgress"></div></div>
+</div>
 
-    <script>
-        // Registrar Service Worker para PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                const swCode = `
-                    self.addEventListener('install', e => self.skipWaiting());
-                    self.addEventListener('activate', e => self.clients.claim());
-                    self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
-                `;
-                const blob = new Blob([swCode], { type: 'application/javascript' });
-                navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
-            });
-        }
+<div class="card">
+<div class="card-title">💧 Agua</div>
+<div class="grid2">
+<div><label>Vasos de hoy</label><input type="number" id="waterInput" min="0" value="0" onchange="saveWater()"></div>
+<div class="stat" style="align-self:end"><small>Objetivo</small><strong id="waterGoal">8</strong></div>
+</div>
+<div class="progress"><div id="waterProgress"></div></div>
+</div>
 
-        // Estado inicial / LocalStorage
-        let config = JSON.parse(localStorage.getItem('fit_config')) || {
-            startWeight: 93.0,
-            targetWeight: 79.0,
-            startDate: new Date().toISOString().split('T')[0],
-            weeklyLoss: 0.75
-        };
+<div class="card">
+<div class="card-title">📏 Medidas recientes</div>
+<div id="latestMeasures" class="grid3"></div>
+</div>
+</section>
 
-        let logs = JSON.parse(localStorage.getItem('fit_logs')) || [];
+<!-- COMIDAS -->
+<section id="food" class="page">
+<div class="card">
+<div class="card-title">🔥 Registrar comida</div>
+<form id="foodForm">
+<label>Comida</label><input id="foodName" placeholder="Ej: Almuerzo" required>
+<div class="grid2">
+<div><label>Descripción</label><input id="foodDesc" placeholder="Ej: pollo con arroz"></div>
+<div><label>Calorías</label><input type="number" id="foodKcal" min="0" required></div>
+</div>
+<button>Agregar comida</button>
+</form>
+</div>
+<div class="card">
+<div class="card-title"><span>Resumen de hoy</span><span id="foodTotal" class="kcal">0 kcal</span></div>
+<div class="progress"><div id="foodProgress"></div></div>
+<div id="foodList" class="list"></div>
+</div>
+</section>
 
-        // Inicializar Inputs de Config
-        document.getElementById('cfgStartWeight').value = config.startWeight;
-        document.getElementById('cfgTargetWeight').value = config.targetWeight;
-        document.getElementById('cfgStartDate').value = config.startDate;
-        document.getElementById('cfgDeficit').value = config.weeklyLoss;
+<!-- ENTRENAMIENTO -->
+<section id="training" class="page">
+<div class="card">
+<div class="card-title">🏋️ Registrar entrenamiento</div>
+<form id="trainingForm">
+<label>Entrenamiento</label><input id="trainName" placeholder="Ej: Tren superior" required>
+<div class="grid3">
+<div><label>Duración (min)</label><input type="number" id="trainMin" min="1" required></div>
+<div><label>Calorías</label><input type="number" id="trainKcal" min="0" placeholder="Opcional"></div>
+<div><label>Tipo</label><select id="trainType"><option>Fuerza</option><option>Cardio</option><option>Mixto</option><option>Deporte</option></select></div>
+</div>
+<button>Guardar entrenamiento</button>
+</form>
+</div>
+<div class="card">
+<div class="card-title">📅 Historial</div>
+<div id="trainingList" class="list"></div>
+</div>
+</section>
 
-        // Setear Fecha/Hora actual en el formulario
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        document.getElementById('inputDateTime').value = now.toISOString().slice(0, 16);
+<!-- DATOS -->
+<section id="data" class="page">
+<div class="card">
+<div class="card-title">⚖️ Nuevo pesaje</div>
+<form id="weightForm">
+<div class="grid2">
+<div><label>Peso (kg)</label><input type="number" id="weight" step=".1" required></div>
+<div><label>Fecha</label><input type="datetime-local" id="weightDate" required></div>
+</div>
+<button>Guardar pesaje</button>
+</form>
+</div>
 
-        // Chart.js Setup
-        const ctx = document.getElementById('weightChart').getContext('2d');
-        let chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                datasets: [
-                    {
-                        label: 'Teórico (Ideal)',
-                        borderColor: '#38bdf8',
-                        borderWidth: 2,
-                        borderDash: [5, 5],
-                        pointRadius: 0,
-                        data: [],
-                        fill: false
-                    },
-                    {
-                        label: 'Real (Pesajes)',
-                        borderColor: '#4ade80',
-                        backgroundColor: 'rgba(74, 222, 128, 0.1)',
-                        borderWidth: 3,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#4ade80',
-                        data: [],
-                        tension: 0.2
-                    },
-                    {
-                        label: 'Promedio 7D',
-                        borderColor: '#c084fc',
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        data: [],
-                        tension: 0.3
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: { unit: 'day', displayFormats: { day: 'dd MMM' } },
-                        grid: { color: '#334155' },
-                        ticks: { color: '#94a3b8' }
-                    },
-                    y: {
-                        grid: { color: '#334155' },
-                        ticks: { color: '#94a3b8' }
-                    }
-                },
-                plugins: {
-                    legend: { labels: { color: '#f8fafc', boxWidth: 12 } }
-                }
-            }
-        });
+<div class="card">
+<div class="card-title">📏 Medidas corporales</div>
+<form id="measureForm">
+<div class="grid2">
+<div><label>Cintura (cm)</label><input type="number" step=".1" id="waist"></div>
+<div><label>Pecho (cm)</label><input type="number" step=".1" id="chest"></div>
+<div><label>Brazo (cm)</label><input type="number" step=".1" id="arm"></div>
+<div><label>Pierna (cm)</label><input type="number" step=".1" id="leg"></div>
+<div><label>Cadera (cm)</label><input type="number" step=".1" id="hip"></div>
+<div><label>Fecha</label><input type="date" id="measureDate"></div>
+</div>
+<button>Guardar medidas</button>
+</form>
+</div>
 
-        function calculateTheoreticalData() {
-            const start = new Date(config.startDate);
-            const totalKgToLose = config.startWeight - config.targetWeight;
-            const weeksNeeded = totalKgToLose / config.weeklyLoss;
-            const daysNeeded = Math.ceil(weeksNeeded * 7);
-            
-            const endDate = new Date(start);
-            endDate.setDate(endDate.getDate() + daysNeeded);
+<div class="card">
+<details>
+<summary>⚙️ Configurar objetivos</summary>
+<form id="configForm" style="margin-top:12px">
+<div class="grid2">
+<div><label>Peso inicial</label><input type="number" step=".1" id="cfgStart" required></div>
+<div><label>Peso meta</label><input type="number" step=".1" id="cfgTarget" required></div>
+<div><label>Altura (cm)</label><input type="number" step=".1" id="cfgHeight" required></div>
+<div><label>Calorías/día</label><input type="number" id="cfgCalories" required></div>
+<div><label>Agua (vasos)</label><input type="number" id="cfgWater" required></div>
+<div><label>Pérdida semanal (kg)</label><select id="cfgLoss"><option value=".5">0,5</option><option value=".75">0,75</option><option value="1">1,0</option></select></div>
+</div>
+<label>Fecha de inicio</label><input type="date" id="cfgDate" required>
+<button>Guardar objetivos</button>
+</form>
+</details>
+</div>
 
-            return [
-                { x: start.toISOString(), y: Number(config.startWeight) },
-                { x: endDate.toISOString(), y: Number(config.targetWeight) }
-            ];
-        }
+<div class="card">
+<div class="card-title">💾 Copia de seguridad</div>
+<div class="actions">
+<button onclick="exportData()">📤 Exportar</button>
+<button class="secondary" onclick="document.getElementById('importFile').click()">📥 Importar</button>
+</div>
+<input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+<button class="danger" onclick="clearAll()">🗑️ Borrar todos los datos</button>
+</div>
 
-        function calculateMovingAverage(sortedLogs) {
-            const maData = [];
-            for (let i = 0; i < sortedLogs.length; i++) {
-                const currentDate = new Date(sortedLogs[i].dateTime);
-                const sevenDaysAgo = new Date(currentDate);
-                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+<div class="card">
+<div class="card-title">⚖️ Historial de pesajes</div>
+<div id="weightList" class="list"></div>
+</div>
+</section>
 
-                const windowLogs = sortedLogs.filter(l => {
-                    const d = new Date(l.dateTime);
-                    return d >= sevenDaysAgo && d <= currentDate;
-                });
+<script>
+const KEY="fitcontrol_pro_v1";
+let state=JSON.parse(localStorage.getItem(KEY))||{
+ config:{startWeight:93,targetWeight:79,height:185,calories:2200,water:8,weeklyLoss:.75,startDate:new Date().toISOString().slice(0,10)},
+ weights:[],measures:[],foods:[],trainings:[],water:{}
+};
 
-                const sum = windowLogs.reduce((acc, curr) => acc + curr.weight, 0);
-                const avg = sum / windowLogs.length;
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function today(){return new Date().toISOString().slice(0,10)}
+function fmtDate(d){return new Date(d).toLocaleDateString("es-AR",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}
+function showPage(id,btn){
+ document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
+ btn.classList.add("active"); updateAll();
+}
+function setNow(){
+ let n=new Date();n.setMinutes(n.getMinutes()-n.getTimezoneOffset());
+ document.getElementById("weightDate").value=n.toISOString().slice(0,16);
+ document.getElementById("measureDate").value=today();
+}
+function initConfig(){
+ let c=state.config;
+ cfgStart.value=c.startWeight;cfgTarget.value=c.targetWeight;cfgHeight.value=c.height;
+ cfgCalories.value=c.calories;cfgWater.value=c.water;cfgLoss.value=c.weeklyLoss;cfgDate.value=c.startDate;
+ waterInput.value=state.water[today()]||0;
+}
+function currentWeight(){
+ return state.weights.length? [...state.weights].sort((a,b)=>new Date(a.date)-new Date(b.date)).at(-1).weight:state.config.startWeight;
+}
+function avg7(){
+ let since=Date.now()-7*86400000, a=state.weights.filter(x=>new Date(x.date).getTime()>=since);
+ return a.length?a.reduce((s,x)=>s+x.weight,0)/a.length:currentWeight();
+}
+function expectedWeight(date){
+ let days=Math.max(0,(new Date(date)-new Date(state.config.startDate))/86400000);
+ return state.config.startWeight-days*(state.config.weeklyLoss/7);
+}
+function updateDashboard(){
+ let w=currentWeight(),c=state.config,lost=c.startWeight-w;
+ let total=c.startWeight-c.targetWeight;
+ let prog=total>0?Math.max(0,Math.min(100,lost/total*100)):0;
+ currentWeightEl.innerHTML=w.toFixed(1)+" <span>kg</span>";
+ startWeightTxt.textContent=c.startWeight.toFixed(1)+" kg";targetWeightTxt.textContent=c.targetWeight.toFixed(1)+" kg";
+ lostEl.textContent=(lost>=0?"-":"+")+Math.abs(lost).toFixed(1)+" kg";progressTxt.textContent=prog.toFixed(0)+"%";
+ goalProgress.style.width=prog+"%";
+ let bmi=w/((c.height/100)**2);document.getElementById("bmi").textContent=bmi.toFixed(1);
+ avg7El.textContent=avg7().toFixed(1)+" kg";
+ let delta=w-expectedWeight(new Date());
+ deltaEl.textContent=(delta>0?"+":"")+delta.toFixed(1)+" kg";
+ deltaEl.style.color=delta<=0?"var(--green)":"var(--red)";
+ let badge=statusBadge;
+ if(!state.weights.length){badge.textContent="Registrá tu primer peso";badge.className="badge yellow"}
+ else if(delta<=.3){badge.textContent="🟢 En camino";badge.className="badge green"}
+ else if(delta<=1){badge.textContent="🟡 Un poco retrasado";badge.className="badge yellow"}
+ else{badge.textContent="🔴 Revisar progreso";badge.className="badge red"}
+ let cal=state.foods.filter(x=>x.date===today()).reduce((s,x)=>s+x.kcal,0);
+ calGoal.textContent=c.calories;calEaten.textContent=cal;calLeft.textContent=Math.max(0,c.calories-cal);
+ calProgress.style.width=Math.min(100,cal/c.calories*100)+"%";
+ calorieStatus.textContent=cal<=c.calories?"Dentro del objetivo":"Superado";
+ calorieStatus.className="badge "+(cal<=c.calories?"green":"red");
+ let water=state.water[today()]||0;waterInput.value=water;waterGoal.textContent=c.water;
+ waterProgress.style.width=Math.min(100,water/c.water*100)+"%";
+ let ts=state.trainings.filter(x=>new Date(x.date).getTime()>=Date.now()-7*86400000).length;
+ weekTraining.textContent=ts;
+ let m=state.measures.at(-1);
+ latestMeasures.innerHTML=m?["waist","chest","arm","leg","hip"].map((k,i)=>`<div class="stat"><small>${["Cintura","Pecho","Brazo","Pierna","Cadera"][i]}</small><strong>${m[k]?m[k]+" cm":"--"}</strong></div>`).join(""):`<div class="empty" style="grid-column:1/-1">Todavía no hay medidas.</div>`;
+}
+const currentWeightEl=document.getElementById("currentWeight"),lostEl=document.getElementById("lost"),progressTxt=document.getElementById("progressTxt"),avg7El=document.getElementById("avg7");
 
-                maData.push({ x: sortedLogs[i].dateTime, y: Number(avg.toFixed(2)) });
-            }
-            return maData;
-        }
+let chart=new Chart(document.getElementById("weightChart"),{type:"line",data:{datasets:[
+ {label:"Teórico",borderColor:"#38bdf8",borderDash:[6,5],pointRadius:0,data:[],tension:.2},
+ {label:"Real",borderColor:"#4ade80",backgroundColor:"#4ade8018",pointRadius:4,data:[],tension:.25},
+ {label:"Promedio 7D",borderColor:"#c084fc",pointRadius:0,data:[],tension:.3}
+]},options:{responsive:true,maintainAspectRatio:false,parsing:false,scales:{x:{type:"time",time:{unit:"day",displayFormats:{day:"dd MMM"}},ticks:{color:"#94a3b8"},grid:{color:"#26344d"}},y:{ticks:{color:"#94a3b8"},grid:{color:"#26344d"}}},plugins:{legend:{labels:{color:"#f8fafc"}}}}});
 
-        function updateApp() {
-            // Ordenar logs por fecha
-            logs.sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
+function updateChart(){
+ let range=document.getElementById("chartRange").value, now=Date.now(), start=range==="all"?0:now-Number(range)*86400000;
+ let ws=[...state.weights].sort((a,b)=>new Date(a.date)-new Date(b.date)).filter(x=>new Date(x.date).getTime()>=start);
+ chart.data.datasets[1].data=ws.map(x=>({x:x.date,y:x.weight}));
+ chart.data.datasets[2].data=ws.map((x,i)=>({x:x.date,y:avgAt(i,ws)}));
+ let end=ws.length?new Date(ws.at(-1).date):new Date();
+ let st=new Date(Math.max(new Date(state.config.startDate).getTime(),start));
+ chart.data.datasets[0].data=[{x:st,y:expectedWeight(st)},{x:end,y:expectedWeight(end)}];
+ chart.update();
+}
+function avgAt(i,arr){
+ let t=new Date(arr[i].date).getTime()-7*86400000, end=new Date(arr[i].date).getTime();
+ let a=arr.filter(x=>new Date(x.date).getTime()>=t&&new Date(x.date).getTime()<=end);
+ return a.reduce((s,x)=>s+x.weight,0)/a.length;
+}
+function renderFoods(){
+ let a=state.foods.filter(x=>x.date===today()).sort((a,b)=>b.id-a.id);
+ foodTotal.textContent=a.reduce((s,x)=>s+x.kcal,0)+" kcal";
+ foodProgress.style.width=Math.min(100,a.reduce((s,x)=>s+x.kcal,0)/state.config.calories*100)+"%";
+ foodList.innerHTML=a.length?a.map(x=>`<div class="item"><span class="icon">🍽️</span><div class="item-main"><div class="item-title">${esc(x.name)}</div><div class="item-sub">${esc(x.desc||"")}</div></div><span class="kcal">${x.kcal} kcal</span><button class="small danger" onclick="delFood(${x.id})">✕</button></div>`).join(""):`<div class="empty">No registraste comidas hoy.</div>`;
+}
+function renderTrainings(){
+ let a=[...state.trainings].sort((a,b)=>new Date(b.date)-new Date(a.date));
+ trainingList.innerHTML=a.length?a.map(x=>`<div class="item"><span class="icon">🏋️</span><div class="item-main"><div class="item-title">${esc(x.name)}</div><div class="item-sub">${x.type} · ${x.min} min · ${fmtDate(x.date)}</div></div><span class="kcal">${x.kcal?x.kcal+" kcal":""}</span><button class="small danger" onclick="delTraining(${x.id})">✕</button></div>`).join(""):`<div class="empty">No hay entrenamientos registrados.</div>`;
+}
+function renderWeights(){
+ let a=[...state.weights].sort((a,b)=>new Date(b.date)-new Date(a.date));
+ weightList.innerHTML=a.length?a.map(x=>`<div class="item"><div class="item-main"><div class="item-title">${x.weight.toFixed(1)} kg</div><div class="item-sub">${fmtDate(x.date)}</div></div><button class="small danger" onclick="delWeight(${x.id})">✕</button></div>`).join(""):`<div class="empty">No hay pesajes.</div>`;
+}
+function updateAll(){updateDashboard();renderFoods();renderTrainings();renderWeights();updateChart();save()}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 
-            // Actualizar Gráfico
-            const theoretical = calculateTheoreticalData();
-            const realData = logs.map(l => ({ x: l.dateTime, y: l.weight }));
-            const maData = calculateMovingAverage(logs);
-
-            chart.data.datasets[0].data = theoretical;
-            chart.data.datasets[1].data = realData;
-            chart.data.datasets[2].data = maData;
-            chart.update();
-
-            // Actualizar Métricas
-            document.getElementById('statTarget').innerText = `${config.targetWeight} kg`;
-
-            if (logs.length > 0) {
-                const last7DaysLogs = logs.filter(l => {
-                    const d = new Date(l.dateTime);
-                    const now = new Date();
-                    return (now - d) <= (7 * 24 * 60 * 60 * 1000);
-                });
-
-                const avg7d = last7DaysLogs.length > 0 
-                    ? (last7DaysLogs.reduce((a, b) => a + b.weight, 0) / last7DaysLogs.length).toFixed(1)
-                    : logs[logs.length - 1].weight.toFixed(1);
-
-                document.getElementById('statAvg').innerText = `${avg7d} kg`;
-
-                // Calcular Delta contra Teórico
-                const latestLog = logs[logs.length - 1];
-                const latestDate = new Date(latestLog.dateTime);
-                const startDate = new Date(config.startDate);
-                const daysElapsed = Math.max(0, (latestDate - startDate) / (1000 * 60 * 60 * 24));
-                const expectedWeight = config.startWeight - (daysElapsed * (config.weeklyLoss / 7));
-                const delta = (latestLog.weight - expectedWeight).toFixed(1);
-
-                const statDelta = document.getElementById('statDelta');
-                const planStatus = document.getElementById('planStatus');
-
-                if (delta <= 0) {
-                    statDelta.innerText = `${delta} kg`;
-                    statDelta.style.color = '#4ade80';
-                    planStatus.innerText = 'En Plan';
-                    planStatus.className = 'badge badge-green';
-                } else {
-                    statDelta.innerText = `+${delta} kg`;
-                    statDelta.style.color = '#f87171';
-                    planStatus.innerText = 'Desviado';
-                    planStatus.className = 'badge badge-red';
-                }
-            }
-
-            // Render Historial
-            const logsList = document.getElementById('logsList');
-            logsList.innerHTML = '';
-            [...logs].reverse().forEach((log) => {
-                const dateObj = new Date(log.dateTime);
-                const formattedDate = dateObj.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-                
-                const item = document.createElement('div');
-                item.className = 'log-item';
-                item.innerHTML = `
-                    <div>
-                        <div class="log-weight">${log.weight.toFixed(1)} kg</div>
-                        <div class="log-date">${formattedDate}</div>
-                    </div>
-                    <button class="btn-del" onclick="deleteLog('${log.id}')">✕</button>
-                `;
-                logsList.appendChild(item);
-            });
-
-            // Guardar en LocalStorage
-            localStorage.setItem('fit_config', JSON.stringify(config));
-            localStorage.setItem('fit_logs', JSON.stringify(logs));
-        }
-
-        // Handlers de Formularios
-        document.getElementById('weightForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const weight = parseFloat(document.getElementById('inputWeight').value);
-            const dateTime = document.getElementById('inputDateTime').value;
-
-            logs.push({
-                id: Date.now().toString(),
-                weight: weight,
-                dateTime: dateTime
-            });
-
-            document.getElementById('inputWeight').value = '';
-            updateApp();
-        });
-
-        document.getElementById('configForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            config.startWeight = parseFloat(document.getElementById('cfgStartWeight').value);
-            config.targetWeight = parseFloat(document.getElementById('cfgTargetWeight').value);
-            config.startDate = document.getElementById('cfgStartDate').value;
-            config.weeklyLoss = parseFloat(document.getElementById('cfgDeficit').value);
-            
-            document.getElementById('configDetails').removeAttribute('open');
-            updateApp();
-        });
-
-        window.deleteLog = function(id) {
-            logs = logs.filter(l => l.id !== id);
-            updateApp();
-        };
-
-        // Render Inicial
-        updateApp();
-    </script>
+weightForm.onsubmit=e=>{e.preventDefault();state.weights.push({id:Date.now(),weight:+weight.value,date:weightDate.value});e.target.reset();setNow();updateAll()};
+foodForm.onsubmit=e=>{e.preventDefault();state.foods.push({id:Date.now(),name:foodName.value,desc:foodDesc.value,kcal:+foodKcal.value,date:today()});e.target.reset();updateAll()};
+trainingForm.onsubmit=e=>{e.preventDefault();state.trainings.push({id:Date.now(),name:trainName.value,min:+trainMin.value,kcal:+trainKcal.value||0,type:trainType.value,date:new Date().toISOString()});e.target.reset();updateAll()};
+measureForm.onsubmit=e=>{e.preventDefault();state.measures.push({date:measureDate.value,waist:+waist.value||null,chest:+chest.value||null,arm:+arm.value||null,leg:+leg.value||null,hip:+hip.value||null});e.target.reset();measureDate.value=today();updateAll()};
+configForm.onsubmit=e=>{e.preventDefault();state.config={startWeight:+cfgStart.value,targetWeight:+cfgTarget.value,height:+cfgHeight.value,calories:+cfgCalories.value,water:+cfgWater.value,weeklyLoss:+cfgLoss.value,startDate:cfgDate.value};updateAll();alert("Objetivos actualizados.")};
+function saveWater(){state.water[today()]=+waterInput.value||0;updateAll()}
+function delFood(id){state.foods=state.foods.filter(x=>x.id!==id);updateAll()}
+function delTraining(id){state.trainings=state.trainings.filter(x=>x.id!==id);updateAll()}
+function delWeight(id){state.weights=state.weights.filter(x=>x.id!==id);updateAll()}
+function exportData(){
+ let blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);a.download="fitcontrol-backup-"+today()+".json";a.click();URL.revokeObjectURL(a.href)
+}
+function importData(e){
+ let file=e.target.files[0];if(!file)return;
+ let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!d.config||!Array.isArray(d.weights))throw 0;state=d;save();initConfig();updateAll();alert("Datos importados correctamente.")}catch{alert("El archivo no es un respaldo válido de FitControl.")}};r.readAsText(file)
+}
+function clearAll(){if(confirm("¿Seguro que querés borrar TODOS los datos? Esta acción no se puede deshacer.")){localStorage.removeItem(KEY);location.reload()}}
+setNow();initConfig();updateAll();
+</script>
 </body>
 </html>
